@@ -77,8 +77,17 @@ static int aeApiAddEvent(aeEventLoop *eventLoop, int fd, int mask) {
      * operation. Otherwise we need an ADD operation. */
     int op = eventLoop->events[fd].mask == AE_NONE ?
             EPOLL_CTL_ADD : EPOLL_CTL_MOD;
+/*
+EPOLLIN：表示对应的文件描述符可以读；
+EPOLLOUT：表示对应的文件描述符可以写；
+EPOLLPRI：表示对应的文件描述符有紧急的数可读；
 
-    ee.events = 0;
+EPOLLERR：表示对应的文件描述符发生错误；
+EPOLLHUP：表示对应的文件描述符被挂断；
+EPOLLET：	ET的epoll工作模式；
+
+*/
+    ee.events = 0;  // 
     mask |= eventLoop->events[fd].mask; /* Merge old events */
     if (mask & AE_READABLE) ee.events |= EPOLLIN;
     if (mask & AE_WRITABLE) ee.events |= EPOLLOUT;

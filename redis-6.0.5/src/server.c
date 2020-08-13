@@ -2889,13 +2889,13 @@ void initServer(void) {
             }
     }
     for (j = 0; j < server.tlsfd_count; j++) {
-        if (aeCreateFileEvent(server.el, server.tlsfd[j], AE_READABLE,
-            acceptTLSHandler,NULL) == AE_ERR)
+        if (aeCreateFileEvent(server.el, server.tlsfd[j], AE_READABLE,acceptTLSHandler,NULL) == AE_ERR)
             {
                 serverPanic(
                     "Unrecoverable error creating server.tlsfd file event.");
             }
     }
+	
     if (server.sofd > 0 && aeCreateFileEvent(server.el,server.sofd,AE_READABLE,
         acceptUnixHandler,NULL) == AE_ERR) serverPanic("Unrecoverable error creating server.sofd file event.");
 
