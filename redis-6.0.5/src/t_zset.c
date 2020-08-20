@@ -1172,7 +1172,8 @@ void zsetConvert(robj *zobj, int encoding) {
     sds ele;
     double score;
 
-    if (zobj->encoding == encoding) return;
+    if (zobj->encoding == encoding) 
+        return;
     if (zobj->encoding == OBJ_ENCODING_ZIPLIST) {
         unsigned char *zl = zobj->ptr;
         unsigned char *eptr, *sptr;
@@ -1368,7 +1369,8 @@ int zsetAdd(robj *zobj, double score, sds ele, int *flags, double *newscore) {
             *flags |= ZADD_NOP;
             return 1;
         }
-    } else if (zobj->encoding == OBJ_ENCODING_SKIPLIST) {
+    } 
+        else if (zobj->encoding == OBJ_ENCODING_SKIPLIST) {
         zset *zs = zobj->ptr;
         zskiplistNode *znode;
         dictEntry *de;
@@ -1402,7 +1404,8 @@ int zsetAdd(robj *zobj, double score, sds ele, int *flags, double *newscore) {
                 *flags |= ZADD_UPDATED;
             }
             return 1;
-        } else if (!xx) {
+        }
+        else if (!xx) {
             ele = sdsdup(ele);
             znode = zslInsert(zs->zsl,score,ele);
             serverAssert(dictAdd(zs->dict,ele,&znode->score) == DICT_OK);

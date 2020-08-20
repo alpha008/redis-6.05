@@ -64,7 +64,7 @@ typedef struct dict {
     unsigned long sizemask;
     unsigned long used;
     void *privdata;
-} dict;
+} dict;// 每次操作dict的时候，需要带属性，然后调用方法去处理
 
 typedef struct dictIterator {
     dict *ht;

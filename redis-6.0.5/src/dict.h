@@ -45,11 +45,11 @@
 #define DICT_NOTUSED(V) ((void) V)
 
 typedef struct dictEntry {
-    void *key;
+    void *key;//键值对
     union {
-        void *val;
-        uint64_t u64;
-        int64_t s64;
+        void *val;//存储值
+        uint64_t u64;//用于redis集群，哨兵，选举
+        int64_t s64;//记录过期时间
         double d;
     } v;
     struct dictEntry *next;
@@ -66,7 +66,7 @@ typedef struct dictType {
 
 /* This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
-typedef struct dictht {
+typedef struct dictht { //哈希结构
     dictEntry **table;
     unsigned long size;
     unsigned long sizemask;
@@ -75,7 +75,7 @@ typedef struct dictht {
 
 typedef struct dict {
     dictType *type;
-    void *privdata;
+    void *privdata;//每一次操作dict赋值privdata上下文 
     dictht ht[2];
     long rehashidx; /* rehashing not in progress if rehashidx == -1 */
     unsigned long iterators; /* number of iterators currently running */

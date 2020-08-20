@@ -859,6 +859,7 @@ static unsigned long rev(unsigned long v) {
  * 3) The reverse cursor is somewhat hard to understand at first, but this
  *    comment is supposed to help.
  */
+//推导下
 unsigned long dictScan(dict *d,
                        unsigned long v,
                        dictScanFunction *fn,
