@@ -225,12 +225,11 @@ static int connSocketSetWriteHandler(connection *conn, ConnectionCallbackFunc fu
 static int connSocketSetReadHandler(connection *conn, ConnectionCallbackFunc func) {
     if (func == conn->read_handler) return C_OK;
 
-    conn->read_handler = func;
+    conn->read_handler = func;// 设置读事件的回调函数
     if (!conn->read_handler)
         aeDeleteFileEvent(server.el,conn->fd,AE_READABLE);
     else
-        if (aeCreateFileEvent(server.el,conn->fd,
-                    AE_READABLE,conn->type->ae_handler,conn) == AE_ERR) return C_ERR;
+        if (aeCreateFileEvent(server.el,conn->fd,AE_READABLE,conn->type->ae_handler,conn) == AE_ERR) return C_ERR;
     return C_OK;
 }
 

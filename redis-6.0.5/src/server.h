@@ -605,14 +605,27 @@ typedef struct RedisModuleDigest {
 #define OBJ_FIRST_SPECIAL_REFCOUNT OBJ_STATIC_REFCOUNT
 typedef struct redisObject {
     unsigned type:4;
-    unsigned encoding:4;
+    unsigned encoding:4; //表明底层数据采用的存储结构
     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
                             * LFU data (least significant 8 bits frequency
                             * and most significant 16 bits access time). */
-    int refcount;
+    int refcount; // 用来释放内存，当引用计数为0时，释放该对象
     void *ptr;
 } robj;
+// 把单个结构体占用的内存用到了极致
+/*
+The actual Redis Object
+#define OBJ_STRING 0     String object
+#define OBJ_LIST 1       List object.
+#define OBJ_SET 2        Set object.
+#define OBJ_ZSET 3       Sorted set object.
+#define OBJ_HASH 4       Hash object.
 
+redis是一个key-value型数据库，key只能之字符串，value可以是字符串，列表，集合
+有序集合、散列表，这5种数据类型使用robj表示，我们称之为redis对象，结构体中type
+字段表示对象的类型
+
+*/
 /* The a string name for an object's type as listed above
  * Native types are checked against the OBJ_STRING, OBJ_LIST, OBJ_* defines,
  * and Module types have their registered name returned. */

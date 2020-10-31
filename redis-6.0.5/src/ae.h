@@ -71,9 +71,9 @@ typedef void aeBeforeSleepProc(struct aeEventLoop *eventLoop);
 /* File event structure */
 typedef struct aeFileEvent {
     int mask; /* one of AE_(READABLE|WRITABLE|BARRIER) */
-    aeFileProc *rfileProc;
-    aeFileProc *wfileProc;
-    void *clientData;
+    aeFileProc *rfileProc;// 注册的回调函数
+    aeFileProc *wfileProc;// 注册的回调函数
+    void *clientData; // 指向一个客户端
 } aeFileEvent;
 
 /* Time event structure */
@@ -99,6 +99,7 @@ typedef struct aeFiredEvent {
 } aeFiredEvent;
 
 /* State of an event based program */
+// 封装了各种事件
 typedef struct aeEventLoop {
     int maxfd;   /* highest file descriptor currently registered */
     int setsize; /* max number of file descriptors tracked */

@@ -149,9 +149,8 @@ void aeDeleteEventLoop(aeEventLoop *eventLoop) {
 void aeStop(aeEventLoop *eventLoop) {
     eventLoop->stop = 1;
 }
-
-int aeCreateFileEvent(aeEventLoop *eventLoop, int fd, int mask,
-        aeFileProc *proc, void *clientData)
+//if (aeCreateFileEvent(server.el,conn->fd,AE_READABLE,conn->type->ae_handler,conn) == AE_ERR) return C_ERR;
+int aeCreateFileEvent(aeEventLoop *eventLoop, int fd, int mask,aeFileProc *proc, void *clientData)
 {
     if (fd >= eventLoop->setsize) {
         errno = ERANGE;
@@ -163,8 +162,8 @@ int aeCreateFileEvent(aeEventLoop *eventLoop, int fd, int mask,
         return AE_ERR;
     fe->mask |= mask;
     if (mask & AE_READABLE) fe->rfileProc = proc;
-    if (mask & AE_WRITABLE) fe->wfileProc = proc;
-    fe->clientData = clientData;
+    if (mask & AE_WRITABLE) fe->wfileProc = proc;// 设置回调函数
+    fe->clientData = clientData;//conn
     if (fd > eventLoop->maxfd)
         eventLoop->maxfd = fd;
     return AE_OK;
@@ -449,7 +448,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
         /* After sleep callback. */
         if (eventLoop->aftersleep != NULL && flags & AE_CALL_AFTER_SLEEP)
             eventLoop->aftersleep(eventLoop);
-
+        // 事件分发
         for (j = 0; j < numevents; j++) {
             aeFileEvent *fe = &eventLoop->events[eventLoop->fired[j].fd];
             int mask = eventLoop->fired[j].mask;
@@ -505,6 +504,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
         }
     }
     /* Check time events */
+    // 如果是超时事件，那么执行下面的
     if (flags & AE_TIME_EVENTS)
         processed += processTimeEvents(eventLoop);
 

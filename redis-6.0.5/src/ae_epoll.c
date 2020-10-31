@@ -84,8 +84,7 @@ EPOLLPRI：表示对应的文件描述符有紧急的数可读；
 
 EPOLLERR：表示对应的文件描述符发生错误；
 EPOLLHUP：表示对应的文件描述符被挂断；
-EPOLLET：	ET的epoll工作模式；
-
+EPOLLET：ET的epoll工作模式；
 */
     ee.events = 0;  // 
     mask |= eventLoop->events[fd].mask; /* Merge old events */

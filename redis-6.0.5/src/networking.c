@@ -99,13 +99,19 @@ client *createClient(connection *conn) {
             connKeepAlive(conn,server.tcpkeepalive);
         connSetReadHandler(conn, readQueryFromClient); //设置已连接的fd的可读事件时，的回调函数
         connSetPrivateData(conn, c);
+        // 相互持有   conn连接的私有数据区域为c
+#if 0 
+void connSetPrivateData(connection *conn, void *data) {
+    conn->private_data = data;
+}
+#endif
     }
 
     selectDb(c,0);
     uint64_t client_id = ++server.next_client_id;
     c->id = client_id;
     c->resp = 2;
-    c->conn = conn;
+    c->conn = conn;// 客户端中赋值
     c->name = NULL;
     c->bufpos = 0;
     c->qb_pos = 0;
@@ -892,6 +898,22 @@ void clientAcceptHandler(connection *conn) {
 }
 
 #define MAX_ACCEPTS_PER_CALL 1000
+#if 1
+connection *connCreateSocket() {
+    connection *conn = zcalloc(sizeof(connection));
+    conn->type = &CT_Socket;
+    conn->fd = -1;
+
+    return conn;
+}
+connection *connCreateAcceptedSocket(int fd) {
+    connection *conn = connCreateSocket();
+    conn->fd = fd;
+    conn->state = CONN_STATE_ACCEPTING;
+    return conn;
+}
+#endif  根据具体的fd 创建一个conn结构
+//        acceptCommonHandler(connCreateAcceptedSocket(cfd),0,cip);
 static void acceptCommonHandler(connection *conn, int flags, char *ip) {
     client *c;
     UNUSED(ip);
@@ -919,9 +941,7 @@ static void acceptCommonHandler(connection *conn, int flags, char *ip) {
     if ((c = createClient(conn)) == NULL) {//创建连接
         char conninfo[100];
         serverLog(LL_WARNING,
-            "Error registering fd event for the new client: %s (conn: %s)",
-            connGetLastError(conn),
-            connGetInfo(conn, conninfo, sizeof(conninfo)));
+            "Error registering fd event for the new client: %s (conn: %s)",connGetLastError(conn),connGetInfo(conn, conninfo, sizeof(conninfo)));
         connClose(conn); /* May be already closed, just ignore errors */
         return;
     }
@@ -964,8 +984,27 @@ void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
         }
         serverLog(LL_VERBOSE,"Accepted %s:%d", cip, cport);
         acceptCommonHandler(connCreateAcceptedSocket(cfd),0,cip);
-    }
+    }// connCreateAcceptedTLS这个函数会创建一个具体的conn出来记录fd 和state
+     // 连接类型具体的连接协议
 }
+#if 0
+
+connection *connCreateSocket() {
+    connection *conn = zcalloc(sizeof(connection));
+    conn->type = &CT_Socket;
+    conn->fd = -1;
+
+    return conn;
+}
+
+connection *connCreateAcceptedSocket(int fd) {
+    connection *conn = connCreateSocket();
+    conn->fd = fd;
+    conn->state = CONN_STATE_ACCEPTING;
+    return conn;
+}
+#endif
+
 
 void acceptTLSHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
     int cport, cfd, max = MAX_ACCEPTS_PER_CALL;
@@ -978,8 +1017,7 @@ void acceptTLSHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
         cfd = anetTcpAccept(server.neterr, fd, cip, sizeof(cip), &cport);
         if (cfd == ANET_ERR) {
             if (errno != EWOULDBLOCK)
-                serverLog(LL_WARNING,
-                    "Accepting client connection: %s", server.neterr);
+                serverLog(LL_WARNING,"Accepting client connection: %s", server.neterr);
             return;
         }
         serverLog(LL_VERBOSE,"Accepted %s:%d", cip, cport);
@@ -1893,7 +1931,8 @@ void readQueryFromClient(connection *conn) {
 
     /* Check if we want to read from the client later when exiting from
      * the event loop. This is the case if threaded I/O is enabled. */
-    if (postponeClientRead(c)) return;//将c放入pending队列中
+    if (postponeClientRead(c)) return;
+    //将c放入pending队列中
 
     readlen = PROTO_IOBUF_LEN;
     /* If this is a multi bulk request, and we are processing a bulk reply

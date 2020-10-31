@@ -158,6 +158,24 @@ static inline int connSetWriteHandler(connection *conn, ConnectionCallbackFunc f
 /* Register a read handler, to be called when the connection is readable.
  * If NULL, the existing handler is removed.
  */
+ #if 1
+ ConnectionType CT_Socket = {
+     .ae_handler = connSocketEventHandler,
+     .close = connSocketClose,
+     .write = connSocketWrite,
+     .read = connSocketRead,
+     .accept = connSocketAccept,
+     .connect = connSocketConnect,
+     .set_write_handler = connSocketSetWriteHandler,
+     .set_read_handler = connSocketSetReadHandler,
+     .get_last_error = connSocketGetLastError,
+     .blocking_connect = connSocketBlockingConnect,
+     .sync_write = connSocketSyncWrite,
+     .sync_read = connSocketSyncRead,
+     .sync_readline = connSocketSyncReadLine
+ };
+
+ #endif
 static inline int connSetReadHandler(connection *conn, ConnectionCallbackFunc func) {
     return conn->type->set_read_handler(conn, func);
 }
